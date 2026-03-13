@@ -31,7 +31,7 @@ This project has been validated end-to-end against the SCM API (provider v1.0.8)
 
 ## Prerequisites
 
-1. **Strata Cloud Manager tenant** with a VM-Series firewall onboarded
+1. **Strata Cloud Manager tenant** with a firewall onboarded
 2. **Service account** with API access ([create one here](https://docs.paloaltonetworks.com/common-services/identity-and-access-access-management/manage-identity-and-access/add-service-accounts))
 3. **Terraform** >= 1.4.6
 4. **SCM Provider** >= 1.0.8 (auto-downloaded by `terraform init`)
@@ -56,10 +56,10 @@ export SCM_SCOPE="tsg_id:your-tsg-id"
 terraform init
 
 # Preview changes (update folder to match your SCM container)
-terraform plan -var="folder=ngfw-shared"
+terraform plan -var="folder=<your_folder>"
 
 # Deploy the golden config
-terraform apply -var="folder=ngfw-shared"
+terraform apply -var="folder=<your_folder>"
 
 # Push the candidate config in SCM to make it active
 # (This step is done in the SCM UI or via the scm_config_versions resource)
@@ -99,13 +99,11 @@ golden-config/
 
 ## Known Limitations
 
-- **Antivirus/WildFire profiles** cannot be created via the SCM API. Create them manually in SCM and reference by name in the profile groups. The default `best-practice` profile is used here.
-- **URL Filtering profiles** (`scm_url_access_profile`) are read-only data sources in the current provider version. Create them manually in SCM.
 - **Config push** — Terraform creates a candidate configuration. You must push/commit it in SCM to activate it on the firewall.
 
 ## SCM Provider Gotchas
 
-The following behaviors were discovered through testing against the live SCM API (v1.0.8). The Terraform Registry documentation does not always surface these constraints, since the docs are JS-rendered and difficult to scrape. Actual `terraform apply` error output remains the most reliable schema reference for this provider.
+The following behaviors were discovered through testing against the live SCM API (v1.0.8).
 
 ### Security Rules (`scm_security_rule`)
 
@@ -145,7 +143,6 @@ The following behaviors were discovered through testing against the live SCM API
 
 ### General Tips
 
-- **The Terraform Registry docs for this provider are JS-rendered** and cannot be fetched by automated tools or scraped reliably. When in doubt, run `terraform plan`/`apply` against the real API — the error messages are the most accurate schema documentation available.
 - **Iterate with `terraform apply -parallelism=1`** when debugging. This serializes API calls and makes error output easier to follow.
 - **SCM authentication rate limits** apply to JWT token requests (~10 concurrent). For CI/CD pipelines, consider the token caching approach described in the provider's GitHub README.
 
